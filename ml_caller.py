@@ -7,7 +7,9 @@ from sklearn.preprocessing import MinMaxScaler,StandardScaler,MaxAbsScaler,Robus
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import RFE
 
-from sklearn.linear_model import LogisticRegression as LR
+from sklearn.feature_extraction import DictVectorizer
+from sklearn import tree
+#from sklearn.linear_model import LogisticRegression as LR
 
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
@@ -64,6 +66,19 @@ def print_boxplot(scores,title):
   plt.show()
   return
 
+# CTree
+vec = DictVectorizer(sparse=False)
+Cfeature = data_1.iloc[:, 0:22]
+c_x_train = vec.fit_transform(Cfeature.to_dict(orient='record'))
+# print('show ft',Cfeature)
+# print('show vec',c_x_train)
+# #print('show vec n1',vec.get_feature_names()) #!!!
+# print('show vec n2',vec.vocabulary_)
+c_y_train = data_1.iloc[:, 23]
+clf = tree.DecisionTreeClassifier(criterion='entropy')
+clf.fit(c_x_train,c_y_train)
+print(clf.score(c_x_train,c_y_train))
+
 # Random forest model
 # Create a random forest regressor model
 rf = RandomForestRegressor()
@@ -74,7 +89,7 @@ y_pred_rf = rf.predict(norm_test_x)
 
 # Train the neural network model
 #mlp = MLPRegressor(hidden_layer_sizes=(6,12), learning_rate_init=0.00042, max_iter=3000,  random_state=42)
-mlp = MLPRegressor(hidden_layer_sizes=(22,484), learning_rate_init=0.00032, max_iter=3000, solver='adam', activation='relu', random_state=42)
+mlp = MLPRegressor(hidden_layer_sizes=(22,154), learning_rate_init=0.00032, max_iter=3000, solver='adam', activation='relu', random_state=42)
 mlp.fit(norm_train_x, norm_train_y)
 print(mlp.score(norm_train_x, norm_train_y))
 # Make predictions on the testing set
