@@ -24,6 +24,8 @@ import numpy as np
 
 from pathlib import Path
 
+import pickle
+
 path = Path.cwd().joinpath('malicious-features').joinpath('features_1k.csv')
 data_1 = pd.read_csv(path, encoding = "ISO-8859-1")
 
@@ -66,69 +68,101 @@ def print_boxplot(scores,title):
   plt.show()
   return
 
+curX =    rob_train_x
+curY =    rob_train_y
+curTestX =  rob_test_x
+curTestY =  rob_test_y
+
 # CTree
-vec = DictVectorizer(sparse=False)
-Cfeature = data_1.iloc[:, 0:22]
-c_x_train = vec.fit_transform(Cfeature.to_dict(orient='record'))
-# print('show ft',Cfeature)
-# print('show vec',c_x_train)
-# #print('show vec n1',vec.get_feature_names()) #!!!
-# print('show vec n2',vec.vocabulary_)
-c_y_train = data_1.iloc[:, 23]
-clf = tree.DecisionTreeClassifier(criterion='entropy')
-clf.fit(c_x_train,c_y_train)
-print(clf.score(c_x_train,c_y_train))
+clf = tree.DecisionTreeClassifier(criterion='entropy')  #'entropy' or 'gini'
+clf.fit(train_x,train_y)
+print(clf.score(train_x,train_y))
+y_pred_clf = clf.predict(test_x)
+
+pickle.dump(clf, open('clf_mdl', "wb"))
 
 # Random forest model
 # Create a random forest regressor model
 rf = RandomForestRegressor()
-rf.fit(norm_train_x, norm_train_y)
-print(rf.score(norm_train_x,norm_train_y))
+rf.fit(curX, curY)
+print(rf.score(curX,curY))
 # Make predictions on the testing set
-y_pred_rf = rf.predict(norm_test_x)
+y_pred_rf = rf.predict(curTestX)
+
+pickle.dump(rf, open('rf_mdl', "wb"))
 
 # Train the neural network model
 #mlp = MLPRegressor(hidden_layer_sizes=(6,12), learning_rate_init=0.00042, max_iter=3000,  random_state=42)
 mlp = MLPRegressor(hidden_layer_sizes=(22,154), learning_rate_init=0.00032, max_iter=3000, solver='adam', activation='relu', random_state=42)
-mlp.fit(norm_train_x, norm_train_y)
-print(mlp.score(norm_train_x, norm_train_y))
+mlp.fit(curX, curY)
+print(mlp.score(curX, curY))
 # Make predictions on the testing set
-y_pred_mlp = mlp.predict(norm_test_x)
+y_pred_mlp = mlp.predict(curTestX)
+
+pickle.dump(mlp, open('mlp_mdl', "wb"))
 
 # fit and evaluate Support Vector Machine model
 # 'scale', 'auto'
 # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
+svmX = norm_train_x
+svmY = norm_train_y
+svmTestX =  norm_test_x
+svmTestY =  norm_test_y
+
 svm = SVR(kernel='poly', coef0=0.75, C=3000, gamma='scale', epsilon=0.1)#0.1, epsilon=.1,max_iter=1000)
-svm.fit(norm_train_x, norm_train_y)
-svm_score = svm.score(norm_train_x, norm_train_y)
+svm.fit(svmX, svmY)
+svm_score = svm.score(svmX, svmY)
 print(svm_score)
 # Make predictions on the testing set
-y_pred_svm = svm.predict(norm_test_x)
+y_pred_svm = svm.predict(svmTestX)
 
-# perform cross-validation and compute MSE for each model
-models = [("Support Vector Machine", svm), ("Neural Network", mlp), ("Random Forest", rf)]
-mse_results = []
+pickle.dump(svm, open('svm.mdl', "wb"))
 
-for name, model in models:
-    # perform 10-fold cross-validation
-    mse_train = -cross_val_score(model, std_train_x, std_train_y, cv=10, scoring='neg_mean_squared_error')
-    mse_test = -cross_val_score(model, std_test_x, std_test_y, cv=10, scoring='neg_mean_squared_error')
-    
-    # store MSE results for each model
-    mse_results.append({'model': name, 'mse_train': mse_train, 'mse_test': mse_test})
+# C Tree
+print("---------------------------CTree-MODE---------------------------")
+scores = get_cross_val_score(clf, c_x_train, c_y_train)
+print_boxplot(scores, 'CTree')
+mse = mean_squared_error(c_y_test, y_pred_clf)
+rmse = np.sqrt(mse)
+r2 = metrics.r2_score(c_y_test, y_pred_clf)
+print("Mean squared error (MSE): {:.2f}".format(mse))
+print("Root mean squared error (RMSE): {:.2f}".format(rmse))
+print("Coefficient of determination (R-squared): {:.2f}".format(r2))
+print("--------------------------------------------")
 
-# plot the boxplots for each model's MSE results
-fig, ax = plt.subplots()
-bp = ax.boxplot([mse['mse_train'] for mse in mse_results] , vert=False, labels=[mse['model'] for mse in mse_results] )
+# Random Forest
+print("---------------------------RF-MODE---------------------------")
+scores = get_cross_val_score(rf, curX, curY)
+print_boxplot(scores, 'RF')
+mse = mean_squared_error(curTestY, y_pred_rf)
+rmse = np.sqrt(mse)
+r2 = metrics.r2_score(curTestY, y_pred_rf)
+print("Mean squared error (MSE): {:.2f}".format(mse))
+print("Root mean squared error (RMSE): {:.2f}".format(rmse))
+print("Coefficient of determination (R-squared): {:.2f}".format(r2))
+print("--------------------------------------------")
 
-ax.set_title("Boxplots of MSE for Regression Models Train")
-ax.set_xlabel("MSE")
-ax.set_ylabel("Model")
-plt.show()
+# MLP
+print("---------------------------MLP-MODE--------------------------")
+scores = get_cross_val_score(mlp, curX, curY)
+print_boxplot(scores, 'MLP')
+mse = mean_squared_error(curTestY, y_pred_mlp)
+rmse = np.sqrt(mse)
+r2 = metrics.r2_score(curTestY, y_pred_mlp)
+print("Mean squared error (MSE): {:.2f}".format(mse))
+print("Root mean squared error (RMSE): {:.2f}".format(rmse))
+print("Coefficient of determination (R-squared): {:.2f}".format(r2))
+print("--------------------------------------------")
 
-fig, ax = plt.subplots()
-bp2 = ax.boxplot([mse['mse_test'] for mse in mse_results] , vert=False, labels=[mse['model'] for mse in mse_results] )
-ax.set_title("Boxplots of MSE for Regression Models Test")
-ax.set_xlabel("MSE")
-ax.set_ylabel("Model")
-plt.show()
+# SVM
+print("---------------------------SVM-MODE--------------------------")
+scores = get_cross_val_score(svm, svmX, svmY)
+print_boxplot(scores, 'SVM')
+mse = mean_squared_error(svmTestY, y_pred_svm)
+rmse = np.sqrt(mse)
+r2 = metrics.r2_score(svmTestY, y_pred_svm)
+print("Mean squared error (MSE): {:.2f}".format(mse))
+print("Root mean squared error (RMSE): {:.2f}".format(rmse))
+print("Coefficient of determination (R-squared): {:.2f}".format(r2))
+print("--------------------------------------------")
+
