@@ -9,6 +9,14 @@ import virustotal_python
 from pprint import pprint
 from base64 import urlsafe_b64encode
 import pandas as pd
+import requests
+import json
+#import whois
+import dns.resolver, dns.rdatatype
+from cryptography import x509
+import socket
+import ssl
+import sys
 
 load_dotenv()
 
@@ -20,6 +28,33 @@ description = '''Web Scaner Bot'''
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
+
+def chkredirect(url):
+    aws = dns.resolver.resolve(url)
+    TTL = aws.rrset.ttl
+    return TTL
+def getCertExpDate(url):
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    with socket.create_connection((url, 443)) as sock:
+        with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+            # get cert in DER format
+            data = ssock.getpeercert(True)
+            pem_data = ssl.DER_cert_to_PEM_cert(data)
+            cert_data = x509.load_pem_x509_certificate(str.encode(pem_data))
+            #print("Expiry date:", cert_data.not_valid_after)
+            expdate = cert_data.not_valid_after
+return expdate
+
+def urlScan(url):
+    apiKey = ''
+    headers = {'API-Key':apikey, 'Content-Type':'application/json'}
+    data={'url':url, 'visibility':'public'}
+    response = requests.post('https://urlscan.io/api/v1/scan',headers=headers, data=json.dumps(data))
+    apilink = response.json()['api']
+    api_response = requests.get(apiLink, headers=headers)
+
 
 bot = commands.Bot(command_prefix='?', description=description, intents=intents)
 @bot.event
@@ -49,5 +84,3 @@ async def _chklink(ctx, link: str):
         await ctx.send("debug fail")
 
 bot.run(dctoken)
-
-##vt api

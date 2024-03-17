@@ -1,4 +1,4 @@
-'redirects', 'not_indexed_by_google', 'certificate_age',
+'redirects', 'not_indexed_by_google', 'certificate_age','age_of_domain',
 
 'email_submission', 'request_url_percentage', 'url_anchor_percentage',
 'meta_percentage', 'script_percentage', 'link_percentage',
@@ -6,7 +6,7 @@
 'popup_window_has_text_field', 'use_iframe', 'has_suspicious_port',
 'external_favicons', 'TTL', 'ip_address_count', 'TXT_record',
 'check_sfh', 'count_domain_occurrences', 'domain_registration_length',
-'abnormal_url', 'age_of_domain', 'is_malicious', 'page_rank_decimal'
+'abnormal_url',  'page_rank_decimal'
 
 multiple-redirects -> redirects
 issuer -> if !google -> not_indexed_by_google
