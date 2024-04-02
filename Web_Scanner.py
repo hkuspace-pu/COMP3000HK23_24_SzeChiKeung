@@ -18,6 +18,11 @@ import socket
 import ssl
 import sys
 
+#custom lib
+import featurePrepare as fp
+import ml_loader as mll
+#
+
 load_dotenv()
 
 dctoken = open(Path.cwd().joinpath('dc-token.txt'),'r').readline()
@@ -29,23 +34,23 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-def chkredirect(url):
-    aws = dns.resolver.resolve(url)
-    TTL = aws.rrset.ttl
-    return TTL
-def getCertExpDate(url):
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-    with socket.create_connection((url, 443)) as sock:
-        with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-            # get cert in DER format
-            data = ssock.getpeercert(True)
-            pem_data = ssl.DER_cert_to_PEM_cert(data)
-            cert_data = x509.load_pem_x509_certificate(str.encode(pem_data))
-            #print("Expiry date:", cert_data.not_valid_after)
-            expdate = cert_data.not_valid_after
-return expdate
+# def chkredirect(url):
+#     aws = dns.resolver.resolve(url)
+#     TTL = aws.rrset.ttl
+#     return TTL
+# def getCertExpDate(url):
+#     context = ssl.create_default_context()
+#     context.check_hostname = False
+#     context.verify_mode = ssl.CERT_NONE
+#     with socket.create_connection((url, 443)) as sock:
+#         with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+#             # get cert in DER format
+#             data = ssock.getpeercert(True)
+#             pem_data = ssl.DER_cert_to_PEM_cert(data)
+#             cert_data = x509.load_pem_x509_certificate(str.encode(pem_data))
+#             #print("Expiry date:", cert_data.not_valid_after)
+#             expdate = cert_data.not_valid_after
+# return expdate
 
 def urlScan(url):
     apiKey = ''
@@ -81,6 +86,19 @@ async def _chklink(ctx, link: str):
             with open(Path(__file__).with_name('link_log.txt'), 'w') as f:
                 f.write(str(report.data))
     except:
+        await ctx.send("debug fail")
+
+@bot.command(name='aichk')
+async def _aichk(ctx, link: str):
+    """aichk : link; use ai to check link"""
+    try:
+        features = fp.getUrlFeatures(link)
+        if features is None:
+            await ctx.send('Could not provide enough features to predict')
+        pred = mll.ctree_predict(features)
+        await ctx.send( "score :"+str(pred[0]) )
+    except ValueError as ve:
+        print(ve)
         await ctx.send("debug fail")
 
 bot.run(dctoken)
