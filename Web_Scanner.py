@@ -34,33 +34,6 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-# def chkredirect(url):
-#     aws = dns.resolver.resolve(url)
-#     TTL = aws.rrset.ttl
-#     return TTL
-# def getCertExpDate(url):
-#     context = ssl.create_default_context()
-#     context.check_hostname = False
-#     context.verify_mode = ssl.CERT_NONE
-#     with socket.create_connection((url, 443)) as sock:
-#         with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-#             # get cert in DER format
-#             data = ssock.getpeercert(True)
-#             pem_data = ssl.DER_cert_to_PEM_cert(data)
-#             cert_data = x509.load_pem_x509_certificate(str.encode(pem_data))
-#             #print("Expiry date:", cert_data.not_valid_after)
-#             expdate = cert_data.not_valid_after
-# return expdate
-
-def urlScan(url):
-    apiKey = ''
-    headers = {'API-Key':apikey, 'Content-Type':'application/json'}
-    data={'url':url, 'visibility':'public'}
-    response = requests.post('https://urlscan.io/api/v1/scan',headers=headers, data=json.dumps(data))
-    apilink = response.json()['api']
-    api_response = requests.get(apiLink, headers=headers)
-
-
 bot = commands.Bot(command_prefix='?', description=description, intents=intents)
 @bot.event
 async def on_ready():
@@ -77,28 +50,43 @@ async def _chklink(ctx, link: str):
     """chklink : link; for check link status"""
     statusCde = "ok"
     try:
-        with virustotal_python.Virustotal(vttoken) as vtotal:
-            resp = vtotal.request("urls", data={"url": link}, method="POST")
-            statusCde=resp.status_code
-            url_id = urlsafe_b64encode(link.encode()).decode().strip("=")
-            report = vtotal.request(f"urls/{url_id}")
-            pprint(report.data)
-            with open(Path(__file__).with_name('link_log.txt'), 'w') as f:
-                f.write(str(report.data))
-    except:
+        vtotal = virustotal_python.Virustotal(vttoken)
+        resp = vtotal.request("urls", data={"url": link}, method="POST")
+        statusCde=resp.status_code
+        url_id = urlsafe_b64encode(link.encode()).decode().strip("=")
+        report = vtotal.request(f"urls/{url_id}")
+        pprint(report.data)
+        with open(Path(__file__).with_name('link_log.txt'), 'w') as f:
+            f.write(str(report.data))
+
+        if('attributes' in report.data):
+            if('last_analysis_stats' in report.data['attributes']):
+                await ctx.send("virustotal result : {:.2f}".format(report.data['attributes']['last_analysis_stats']['malicious']*100) + "% possibility is malicious")
+            else:
+                await ctx.send("no last analysis stats")
+        else:
+            await ctx.send("fail get analysis stats from virustotal")
+    except ValueError as ve:
+        print(ve)
         await ctx.send("debug fail")
 
 @bot.command(name='aichk')
 async def _aichk(ctx, link: str):
     """aichk : link; use ai to check link"""
+
     try:
         features = fp.getUrlFeatures(link)
         if features is None:
             await ctx.send('Could not provide enough features to predict')
-        pred = mll.ctree_predict(features)
-        await ctx.send( "score :"+str(pred[0]) )
+        ctree_pred = mll.ctree_predict(features)*100
+        rf_pred = mll.RF_predict(features)*100
+        SVM_pred = mll.SVM_predict(features)*100
+        #MLP_pred = mll.MLP_predict(features)*100
+        await ctx.send( "Ctree result : {:.2f}".format(ctree_pred[0])+"% possibility is malicious"
+        + "\nRF result : {:.2f}".format(rf_pred[0])+"% possibility is malicious"
+        + "\nSVM result : {:.2f}".format(SVM_pred[0]) +"% possibility is malicious")
+        
     except ValueError as ve:
         print(ve)
         await ctx.send("debug fail")
-
 bot.run(dctoken)

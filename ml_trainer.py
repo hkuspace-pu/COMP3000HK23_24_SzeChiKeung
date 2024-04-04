@@ -26,12 +26,12 @@ from pathlib import Path
 
 import pickle
 
-path = Path.cwd().joinpath('malicious-features').joinpath('features_1k.csv')
+path = Path.cwd().joinpath('testcase').joinpath('train_1m.csv')
 data_1 = pd.read_csv(path, encoding = "ISO-8859-1")
 
 # Split the data into input and output variables
-x = data_1.iloc[:, 0:22].values   # Input features
-y = data_1.iloc[:, 23].values     # Output (capacity)
+X = data_1.iloc[1:, 0:10].values   # Input features
+Y = data_1.iloc[1:, 10].values     # Output (capacity)
 
 X_norm = Normalizer().fit_transform(x)
 
@@ -79,7 +79,7 @@ clf.fit(train_x,train_y)
 print(clf.score(train_x,train_y))
 y_pred_clf = clf.predict(test_x)
 
-pickle.dump(clf, open('clf_mdl', "wb"))
+pickle.dump(clf, open('clf.mdl', "wb"))
 
 # Random forest model
 # Create a random forest regressor model
@@ -89,17 +89,17 @@ print(rf.score(curX,curY))
 # Make predictions on the testing set
 y_pred_rf = rf.predict(curTestX)
 
-pickle.dump(rf, open('rf_mdl', "wb"))
+pickle.dump(rf, open('rf.mdl', "wb"))
 
 # Train the neural network model
 #mlp = MLPRegressor(hidden_layer_sizes=(6,12), learning_rate_init=0.00042, max_iter=3000,  random_state=42)
-mlp = MLPRegressor(hidden_layer_sizes=(22,154), learning_rate_init=0.00032, max_iter=3000, solver='adam', activation='relu', random_state=42)
+mlp = MLPRegressor (hidden_layer_sizes=(120,20,20,5), learning_rate_init=0.00035, solver='adam', activation='relu', random_state=42)
 mlp.fit(curX, curY)
 print(mlp.score(curX, curY))
 # Make predictions on the testing set
 y_pred_mlp = mlp.predict(curTestX)
 
-pickle.dump(mlp, open('mlp_mdl', "wb"))
+pickle.dump(mlp, open('mlp.mdl', "wb"))
 
 # fit and evaluate Support Vector Machine model
 # 'scale', 'auto'
@@ -143,16 +143,16 @@ print("Coefficient of determination (R-squared): {:.2f}".format(r2))
 print("--------------------------------------------")
 
 # MLP
-print("---------------------------MLP-MODE--------------------------")
-scores = get_cross_val_score(mlp, curX, curY)
-print_boxplot(scores, 'MLP')
-mse = mean_squared_error(curTestY, y_pred_mlp)
-rmse = np.sqrt(mse)
-r2 = metrics.r2_score(curTestY, y_pred_mlp)
-print("Mean squared error (MSE): {:.2f}".format(mse))
-print("Root mean squared error (RMSE): {:.2f}".format(rmse))
-print("Coefficient of determination (R-squared): {:.2f}".format(r2))
-print("--------------------------------------------")
+#print("---------------------------MLP-MODE--------------------------")
+#scores = get_cross_val_score(mlp, curX, curY)
+#print_boxplot(scores, 'MLP')
+#mse = mean_squared_error(curTestY, y_pred_mlp)
+#rmse = np.sqrt(mse)
+#r2 = metrics.r2_score(curTestY, y_pred_mlp)
+#print("Mean squared error (MSE): {:.2f}".format(mse))
+#print("Root mean squared error (RMSE): {:.2f}".format(rmse))
+#print("Coefficient of determination (R-squared): {:.2f}".format(r2))
+#print("--------------------------------------------")
 
 # SVM
 print("---------------------------SVM-MODE--------------------------")

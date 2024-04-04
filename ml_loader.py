@@ -2,33 +2,30 @@ import pickle
 import pandas as pd
 from pathlib import Path
 
-#modelPath = Path.cwd().joinpath('model')
-
-# rf_mdl_name = modelPath.joinpath('rf.mdl')
-# clf_mdl_name = modelPath.joinpath('clf.mdl')
-# mlp_mdl_name = modelPath.joinpath('mlp.mdl')
-# # svm_mdl_name = modelPath.joinpath('svm.mdl')
-
-# rf_mdl = pickle.load(open(rf_mdl_name,'rb'))
-# clf_mdl = pickle.load(open(clf_mdl_name,'rb'))
-# mlp_mdl = pickle.load(open(mlp_mdl_name,'rb'))
-# # svm_mdl = pickle.load(open(svm_mdl_name,'rb'))
-
-# path = Path.cwd().joinpath('malicious-features').joinpath('features_1k.csv')
-# data_1 = pd.read_csv(path, encoding = "ISO-8859-1")
-
-# # Split the data into input and output variables
-# x = data_1.iloc[1:2, 0:22].values   # Input features
-
-# rf_pred = rf_mdl.predict(x)
-# clf_pred = clf_mdl.predict(x)
-# mlp_pred = mlp_mdl.predict(x)
-
-# print(rf_pred,clf_pred,mlp_pred)
-
 def ctree_predict(xdf):
     modelPath = Path.cwd().joinpath('mdl')
     clf_mdl_name = modelPath.joinpath('clf.mdl')
     clf_mdl = pickle.load(open(clf_mdl_name,'rb'))
     clf_pred = clf_mdl.predict(xdf.values)
     return clf_pred
+
+def RF_predict(xdf):
+    modelPath = Path.cwd().joinpath('mdl')
+    rf_mdl_name = modelPath.joinpath('rf.mdl')
+    rf_mdl = pickle.load(open(rf_mdl_name,'rb'))
+    rf_pred = rf_mdl.predict(xdf.values)
+    return rf_pred
+
+def SVM_predict(xdf):
+    modelPath = Path.cwd().joinpath('mdl')
+    SVM_mdl_name = modelPath.joinpath('svm.mdl')
+    SVM_mdl = pickle.load(open(SVM_mdl_name,'rb'))
+    SVM_pred = SVM_mdl.predict(xdf.values)
+    return SVM_pred
+
+def MLP_predict(xdf):
+    modelPath = Path.cwd().joinpath('mdl')
+    MLP_mdl_name = modelPath.joinpath('mlp.mdl')
+    MLP_mdl = pickle.load(open(MLP_mdl_name,'rb'))
+    MLP_pred = MLP_mdl.predict(xdf.values)
+    return MLP_pred
