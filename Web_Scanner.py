@@ -29,7 +29,7 @@ dctoken = open(Path.cwd().joinpath('dc-token.txt'),'r').readline()
 vttoken = open(Path.cwd().joinpath('vt-token.txt'),'r').readline()
 TOKEN = os.getenv(dctoken)
 
-description = '''Web Scaner Bot'''
+description = '''URLs Scanner Bot'''
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -61,7 +61,8 @@ async def _chklink(ctx, link: str):
 
         if('attributes' in report.data):
             if('last_analysis_stats' in report.data['attributes']):
-                await ctx.send("virustotal result : {:.2f}".format(report.data['attributes']['last_analysis_stats']['malicious']*100) + "% possibility is malicious")
+                await ctx.send("virustotal result : {:.2f}".format(report.data['attributes']['last_analysis_stats']
+                ['malicious']) + "% possibility is malicious")
             else:
                 await ctx.send("no last analysis stats")
         else:
