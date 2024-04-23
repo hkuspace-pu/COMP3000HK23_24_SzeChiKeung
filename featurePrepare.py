@@ -138,7 +138,10 @@ def get_urlScan_apiLink(url):
     headers = urlScanHdr()
     data={'url':url, 'visibility':'public'}
     response = requests.post('https://urlscan.io/api/v1/scan',headers=headers, data=json.dumps(data))
-    apiLink = response.json()['api']
+    if 'api' in response.json():
+        apiLink = response.json()['api']
+    else:
+        apiLink = "";
     return apiLink
 
 def urlScan(url):
@@ -147,6 +150,8 @@ def urlScan(url):
 
 def getJsonFromUrlScan(urlpath):
     apiLink = get_urlScan_apiLink(urlpath)
+    if(apiLink == ""):
+        return None
     start = time.time()
     while(True):
         apiJson = urlScan(apiLink).json()

@@ -17,6 +17,7 @@ from cryptography import x509
 import socket
 import ssl
 import sys
+import numpy as np
 
 #custom lib
 import featurePrepare as fp
@@ -55,9 +56,9 @@ async def _chklink(ctx, link: str):
         statusCde=resp.status_code
         url_id = urlsafe_b64encode(link.encode()).decode().strip("=")
         report = vtotal.request(f"urls/{url_id}")
-        pprint(report.data)
-        with open(Path(__file__).with_name('link_log.txt'), 'w') as f:
-            f.write(str(report.data))
+        # pprint(report.data)
+        # with open(Path(__file__).with_name('link_log.txt'), 'w') as f:
+        #     f.write(str(report.data))
 
         if('attributes' in report.data):
             if('last_analysis_stats' in report.data['attributes']):
@@ -80,12 +81,24 @@ async def _aichk(ctx, link: str):
         if features is None:
             await ctx.send('Could not provide enough features to predict')
         ctree_pred = mll.ctree_predict(features)*100
-        rf_pred = mll.RF_predict(features)*100
-        SVM_pred = mll.SVM_predict(features)*100
+        rfClamp=np.clip(mll.RF_predict(features), 0.1, 1)
+        rf_pred=rfClamp*100
+        SVMClamp=np.clip(mll.SVM_predict(features), 0.3, 0.9)
+        SVM_pred = SVMClamp*100
         #MLP_pred = mll.MLP_predict(features)*100
         await ctx.send( "Ctree result : {:.2f}".format(ctree_pred[0])+"% possibility is malicious"
         + "\nRF result : {:.2f}".format(rf_pred[0])+"% possibility is malicious"
         + "\nSVM result : {:.2f}".format(SVM_pred[0]) +"% possibility is malicious")
+    #    features = fp.getUrlFeatures(link)
+    #    if features is None:
+    #        await ctx.send('Could not provide enough features to predict')
+    #    ctree_pred = mll.ctree_predict(features)*100
+    #    rf_pred = mll.RF_predict(features)*100
+    #    SVM_pred = mll.SVM_predict(features)*100
+    #    #MLP_pred = mll.MLP_predict(features)*100
+    #    await ctx.send( "Ctree result : {:.2f}".format(ctree_pred[0])+"% possibility is malicious"
+    #    + "\nRF result : {:.2f}".format(rf_pred[0])+"% possibility is malicious"
+    #   + "\nSVM result : {:.2f}".format(SVM_pred[0]) +"% possibility is malicious")
         
     except ValueError as ve:
         print(ve)
