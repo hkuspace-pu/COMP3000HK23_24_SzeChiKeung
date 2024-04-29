@@ -80,26 +80,22 @@ async def _aichk(ctx, link: str):
         features = fp.getUrlFeatures(link)
         if features is None:
             await ctx.send('Could not provide enough features to predict')
-        ctree_pred = mll.ctree_predict(features)*100
-        rfClamp=np.clip(mll.RF_predict(features), 0.1, 1)
-        rf_pred=rfClamp*100
-        SVMClamp=np.clip(mll.SVM_predict(features), 0.3, 0.9)
-        SVM_pred = SVMClamp*100
-        #MLP_pred = mll.MLP_predict(features)*100
-        await ctx.send( "Ctree result : {:.2f}".format(ctree_pred[0])+"% possibility is malicious"
-        + "\nRF result : {:.2f}".format(rf_pred[0])+"% possibility is malicious"
-        + "\nSVM result : {:.2f}".format(SVM_pred[0]) +"% possibility is malicious")
-    #    features = fp.getUrlFeatures(link)
-    #    if features is None:
-    #        await ctx.send('Could not provide enough features to predict')
-    #    ctree_pred = mll.ctree_predict(features)*100
-    #    rf_pred = mll.RF_predict(features)*100
-    #    SVM_pred = mll.SVM_predict(features)*100
-    #    #MLP_pred = mll.MLP_predict(features)*100
-    #    await ctx.send( "Ctree result : {:.2f}".format(ctree_pred[0])+"% possibility is malicious"
-    #    + "\nRF result : {:.2f}".format(rf_pred[0])+"% possibility is malicious"
-    #   + "\nSVM result : {:.2f}".format(SVM_pred[0]) +"% possibility is malicious")
-        
+        else:
+            c45_pred = mll.c45_predict(features)*100
+            #ctree_pred = mll.ctree_predict(features)*100
+            rf_pred=np.clip(mll.RF_predict(features), 0.1, 1)*100
+            SVM_pred=np.clip(mll.SVM_predict(features), 0.3, 0.9)*100
+            #MLPClamp=np.clip(mll.MLP_predict(features), 0.1, 1)
+            #MLP_pred = MLPClamp*100
+            #MLP_pred = mll.MLP_predict(features)*100
+            await ctx.send(
+              "\nC4.5 result : {:.2f}".format(c45_pred[0]) +"% possibility is malicious"
+            + "\nRF result : {:.2f}".format(rf_pred[0])+"% possibility is malicious"
+            + "\nSVM result : {:.2f}".format(SVM_pred[0]) +"% possibility is malicious"
+            )
+            #+ "\nMLP result : {:.2f}".format(MLP_pred[0]) +"% possibility is malicious")
+            #"Ctree result : {:.2f}".format(ctree_pred[0])+"% possibility is malicious"
+ 
     except ValueError as ve:
         print(ve)
         await ctx.send("debug fail")

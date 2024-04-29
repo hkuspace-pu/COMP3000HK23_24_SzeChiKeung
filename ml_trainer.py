@@ -26,7 +26,7 @@ from pathlib import Path
 
 import pickle
 
-path = Path.cwd().joinpath('testcase').joinpath('train_1m.csv')
+path = Path.cwd().joinpath('testcase').joinpath('train_f.csv')
 data_1 = pd.read_csv(path, encoding = "ISO-8859-1")
 
 # Split the data into input and output variables
@@ -73,6 +73,17 @@ curY =    rob_train_y
 curTestX =  rob_test_x
 curTestY =  rob_test_y
 
+# C4.5
+c45 = C45Classifier()
+c45.fit(train_x,train_y)
+starttime = time.time()
+c45.summary()
+print(c45.score(train_x,train_y))
+y_pred_c45 = np.array(c45.predict(test_x))
+
+pickle.dump(c45, open('c45_f.mdl', "wb"))
+
+
 # CTree
 clf = tree.DecisionTreeClassifier(criterion='entropy')  #'entropy' or 'gini'
 clf.fit(train_x,train_y)
@@ -91,19 +102,6 @@ y_pred_rf = rf.predict(curTestX)
 
 pickle.dump(rf, open('rf.mdl', "wb"))
 
-# Train the neural network model
-#mlp = MLPRegressor(hidden_layer_sizes=(6,12), learning_rate_init=0.00042, max_iter=3000,  random_state=42)
-mlp = MLPRegressor (hidden_layer_sizes=(120,20,20,5), learning_rate_init=0.00035, solver='adam', activation='relu', random_state=42)
-mlp.fit(curX, curY)
-print(mlp.score(curX, curY))
-# Make predictions on the testing set
-y_pred_mlp = mlp.predict(curTestX)
-
-pickle.dump(mlp, open('mlp.mdl', "wb"))
-
-# fit and evaluate Support Vector Machine model
-# 'scale', 'auto'
-# 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
 svmX = norm_train_x
 svmY = norm_train_y
 svmTestX =  norm_test_x
@@ -141,18 +139,6 @@ print("Mean squared error (MSE): {:.2f}".format(mse))
 print("Root mean squared error (RMSE): {:.2f}".format(rmse))
 print("Coefficient of determination (R-squared): {:.2f}".format(r2))
 print("--------------------------------------------")
-
-# MLP
-#print("---------------------------MLP-MODE--------------------------")
-#scores = get_cross_val_score(mlp, curX, curY)
-#print_boxplot(scores, 'MLP')
-#mse = mean_squared_error(curTestY, y_pred_mlp)
-#rmse = np.sqrt(mse)
-#r2 = metrics.r2_score(curTestY, y_pred_mlp)
-#print("Mean squared error (MSE): {:.2f}".format(mse))
-#print("Root mean squared error (RMSE): {:.2f}".format(rmse))
-#print("Coefficient of determination (R-squared): {:.2f}".format(r2))
-#print("--------------------------------------------")
 
 # SVM
 print("---------------------------SVM-MODE--------------------------")
