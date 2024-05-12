@@ -12,15 +12,6 @@ def c45_predict(xdf):
     c45_pred = c45_mdl.predict(xdf.values)
     return numpy.array(c45_pred)
 
-def ctree_predict(xdf):
-    # modelPath = Path.cwd().joinpath('mdl')
-    modelPath = Path.cwd().joinpath('testcase').joinpath('f_mdl')
-    # clf_mdl_name = modelPath.joinpath('clf.mdl')
-    clf_mdl_name = modelPath.joinpath('clf_f.mdl')
-    clf_mdl = pickle.load(open(clf_mdl_name,'rb'))
-    clf_pred = clf_mdl.predict(xdf.values)
-    return clf_pred
-
 def RF_predict(xdf):
     # modelPath = Path.cwd().joinpath('mdl')
     modelPath = Path.cwd().joinpath('testcase').joinpath('f_mdl')
@@ -37,11 +28,16 @@ def SVM_predict(xdf):
     SVM_pred = SVM_mdl.predict(xdf.values)
     return SVM_pred
 
-def MLP_predict(xdf):
-    # modelPath = Path.cwd().joinpath('mdl')
-    modelPath = Path.cwd().joinpath('testcase').joinpath('f_mdl')
-    # MLP_mdl_name = modelPath.joinpath('mlp.mdl')
-    MLP_mdl_name = modelPath.joinpath('mlp_f.mdl')
-    MLP_mdl = pickle.load(open(MLP_mdl_name,'rb'))
-    MLP_pred = MLP_mdl.predict(xdf.values)
-    return MLP_pred
+# def MLP_predict(xdf):
+#   modelPath = Path.cwd().joinpath('testcase').joinpath('f_mdl')
+#   MLP_mdl_name = modelPath.joinpath('mlp_f.mdl')
+#   MLP_mdl = pickle.load(open(MLP_mdl_name,'rb'))
+#   MLP_pred = MLP_mdl.predict(xdf.values)
+#   return MLP_pred
+
+#   def ctree_predict(xdf):
+#       modelPath = Path.cwd().joinpath('testcase').joinpath('f_mdl')
+#       clf_mdl_name = modelPath.joinpath('clf_f.mdl')
+#       clf_mdl = pickle.load(open(clf_mdl_name,'rb'))
+#       clf_pred = clf_mdl.predict(xdf.values)
+#       return clf_pred

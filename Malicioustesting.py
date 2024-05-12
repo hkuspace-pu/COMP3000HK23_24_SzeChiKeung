@@ -11,8 +11,10 @@ def main():
     df.columns = ['URL']
     
     # Prepare for output
-    results = {'Ctree': [], 'RF': [], 'SVM': [], 'C4.5': []} 
-    
+    #results = {'Ctree': [], 'RF': [], 'SVM': [], 'C4.5': []} 
+    results = {'RF': [], 'SVM': [], 'C4.5': []} 
+    #results = {'C4.5': []} 
+
     # Process each URL
     for index, row in df.iterrows():
         url = row['URL']
@@ -20,19 +22,19 @@ def main():
         
         if features is not None:
             # Make predictions
-            ctree_pred = np.clip(ctree_predict(features), 0, 1) * 100
+            #ctree_pred = np.clip(ctree_predict(features), 0, 1) * 100
             rf_pred = np.clip(RF_predict(features), 0.1, 1) * 100
             svm_pred = np.clip(SVM_predict(features), 0.3, 0.9) * 100
             c45_pred = np.clip(c45_predict(features), 0, 1) * 100  
             
             # Store results
-            results['Ctree'].append(f"{ctree_pred[0]:.2f}%")
+            #results['Ctree'].append(f"{ctree_pred[0]:.2f}%")
             results['RF'].append(f"{rf_pred[0]:.2f}%")
             results['SVM'].append(f"{svm_pred[0]:.2f}%")
             results['C4.5'].append(f"{c45_pred[0]:.2f}%") 
         else:
             # Handle cases where features could not be prepared
-            results['Ctree'].append("N/A")
+            #results['Ctree'].append("N/A")
             results['RF'].append("N/A")
             results['SVM'].append("N/A")
             results['C4.5'].append("N/A")  
